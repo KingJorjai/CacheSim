@@ -15,7 +15,7 @@ public class CacheMemoria {
     private final int TCM;
     private final int TMN;
     private final int TBuff;
-    private final int TBl;
+    private final int TBt;
 
     /** 0(FIFO) - 1(LRU) */
     private final boolean ordPolitika;
@@ -45,7 +45,7 @@ public class CacheMemoria {
         this.TCM = 2;
         this.TMN = 20;
         this.TBuff = 1;
-        this.TBl = TMN + (blokeTamaina-1)*TBuff;
+        this.TBt = TMN + (blokeTamaina-1)*TBuff;
 
         cache = new int[5][8];
         Arrays.fill(Arrays.stream(cache).flatMapToInt(Arrays::stream).toArray(), 0);
@@ -79,6 +79,49 @@ public class CacheMemoria {
         else {
             // Miss
             zikloak += ekarriBlokea(helbidea);
+        }
+
+        return zikloak;
+    }
+
+    /**
+     * Idatzi cachean
+     * @param helbidea Helbide fisikoa
+     * @return Ziklo kopurua
+     */
+    public int idatzi(int helbidea) {
+        int blokeaMN = helbidea / hitzTamaina / blokeTamaina;
+        int multzoa = blokeaMN % (8/multzoTamaina);
+        int blokeaCM = helbidea % blokeTamaina;
+
+        int zikloak = 0;
+
+        if (idazPolitika==WB){
+            if (cacheanDago(helbidea)) {
+                // Hit
+                zikloak += TCM;
+                cache[ALD][azkenikAtzitutakoCMBlokea] = 1;
+            }
+            else {
+                // Miss
+                zikloak += ekarriBlokea(helbidea);
+                cache[ALD][azkenikAtzitutakoCMBlokea] = 1;
+            }
+        } else {
+            // Write-Through
+            if (cacheanDago(helbidea)) {
+                // Hit
+                zikloak += TCM + TMN;
+            }
+            else {
+                // Miss
+                if (wtPolitika==WA) {
+                    zikloak += ekarriBlokea(helbidea) + TMN;
+                }
+                else {
+                    zikloak += TCM + TMN;
+                }
+            }
         }
 
         return zikloak;
@@ -122,7 +165,7 @@ public class CacheMemoria {
             }
             cache[ORD][aukeratutakoBlokea] = 0;
             azkenikAtzitutakoCMBlokea = aukeratutakoBlokea;
-            zikloak += TCM + TBl;
+            zikloak += TCM + TBt;
 
         } else {
             // Hutsik ez dago
@@ -148,6 +191,16 @@ public class CacheMemoria {
                 if (cache[TAG][i] == tag) {
                     // Hit
                     azkenikAtzitutakoCMBlokea = i;
+
+                    // LRU politika
+                    if (ordPolitika == LRU) {
+                        for (int j = multzoa*multzoTamaina; j < multzoa*multzoTamaina+multzoTamaina; j++) {
+                            if (cache[OKUP][j] == 1 && cache[ORD][j] < cache[ORD][i]) {
+                                cache[ORD][j]++;
+                            }
+                        }
+                        cache[ORD][i] = 0;
+                    }
                     return true;
                 }
             }
@@ -183,7 +236,7 @@ public class CacheMemoria {
         if (idazPolitika == WB && cache[ALD][kentzekoBlokea] == 1) {
             // Write-Back
             cache[ALD][kentzekoBlokea] = 0;
-            return TCM + TBl;
+            return TCM + TBt;
         } else
             return 0;
 
@@ -230,6 +283,12 @@ public class CacheMemoria {
      */
     public void irakurriAndPrint(int helbidea) {
         int zikloak = irakurri(helbidea);
+        printCache();
+        System.out.println("Helbide: "+helbidea+" Zikloak: "+zikloak);
+    }
+
+    public void idatziAndPrint(int helbidea) {
+        int zikloak = idatzi(helbidea);
         printCache();
         System.out.println("Helbide: "+helbidea+" Zikloak: "+zikloak);
     }

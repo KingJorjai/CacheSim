@@ -2,21 +2,16 @@
 // click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
 public class Main {
     public static void main(String[] args) {
-        CacheMemoria cache = new CacheMemoria(4, 4, 4, CacheMemoria.LRU, CacheMemoria.WB, CacheMemoria.WA);
-        cache.printCache();
-        cache.irakurriAndPrint(0);
-        cache.irakurriAndPrint(4);
-        cache.irakurriAndPrint(8);
-        cache.irakurriAndPrint(12);
+        CacheMemoria c = new CacheMemoria(2, 4, 2, CacheMemoria.LRU, CacheMemoria.WT, CacheMemoria.WA);
+        c.printCache();
+        c.idatziAndPrint(34);
+        c.irakurriAndPrint(100);
+        c.idatziAndPrint(32);
+        c.irakurriAndPrint(58);
+        c.irakurriAndPrint(2);
+        c.idatziAndPrint(36);
+        c.irakurriAndPrint(0);
+        c.idatziAndPrint(4);
 
-        cache.irakurriAndPrint(16);
-        cache.irakurriAndPrint(32);
-        cache.irakurriAndPrint(48);
-        cache.irakurriAndPrint(64);
-        cache.irakurriAndPrint(80);
-        cache.irakurriAndPrint(96);
-        cache.irakurriAndPrint(112);
-        cache.irakurriAndPrint(128);
-        cache.irakurriAndPrint(144);
     }
 }
