@@ -7,6 +7,7 @@
     <list default="true" id="cfb48396-e96e-4561-b17d-6281ca3b8acb" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/CacheMemoria.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/CacheMemoria.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Main.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -34,7 +35,7 @@
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
-    "Application.Main.executor": "Debug",
+    "Application.Main.executor": "Run",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "git-widget-placeholder": "main",
     "ignore.virus.scanning.warn.message": "true",
@@ -86,7 +87,7 @@
       <workItem from="1727424767555" duration="1613000" />
       <workItem from="1727426550395" duration="535000" />
       <workItem from="1727427112528" duration="4749000" />
-      <workItem from="1727432978389" duration="6575000" />
+      <workItem from="1727432978389" duration="8825000" />
     </task>
     <servers />
   </component>
@@ -100,16 +101,6 @@
           <properties class="java.lang.ArrayIndexOutOfBoundsException" package="java.lang" />
           <option name="timeStamp" value="3" />
         </breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/src/Main.java</url>
-          <line>8</line>
-          <option name="timeStamp" value="5" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/src/CacheMemoria.java</url>
-          <line>43</line>
-          <option name="timeStamp" value="6" />
-        </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
     <pin-to-top-manager>
@@ -117,5 +108,10 @@
         <PinnedItemInfo parentTag="CacheMemoria" memberName="cache" />
       </pinned-members>
     </pin-to-top-manager>
+    <watches-manager>
+      <configuration name="Application">
+        <watch expression="i" />
+      </configuration>
+    </watches-manager>
   </component>
 </project>

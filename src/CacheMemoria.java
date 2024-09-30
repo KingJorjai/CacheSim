@@ -6,24 +6,46 @@ import java.util.Arrays;
  */
 public class CacheMemoria {
 
-    private int hitzTamaina;
-    private int blokeTamaina;
-    private int multzoTamaina;
+    /** Cachearen propietateak */
+    private final int hitzTamaina;
+    private final int blokeTamaina;
+    private final int multzoTamaina;
+
+    /** Latentzia denborak */
+    private final int TCM;
+    private final int TMN;
+    private final int TBuff;
+    private final int TBl;
 
     /** 0(FIFO) - 1(LRU) */
-    private int ordPolitika;
-    public final static int FIFO=0, LRU=1;
+    private final boolean ordPolitika;
+    public final static boolean FIFO=true, LRU=false;
+
+    /** 0(Write-Back) - 1(Write-Through) */
+    private final boolean idazPolitika;
+    public final static boolean WB=false, WT=true;
+
+    /** 0(Write-Allocate) - 1(No-Write-Allocate) */
+    private final boolean wtPolitika;
+    public final static boolean WA=false, NWA=true;
 
     private final int OKUP=0, ALD=1, TAG=2, ORD=3, BLOKEA=4;
     private int [][] cache;
 
     private int azkenikAtzitutakoCMBlokea = -1;
 
-    public CacheMemoria(int hitzTamaina, int blokeTamaina, int multzoTamaina, int ordPolitika) {
+    public CacheMemoria(int hitzTamaina, int blokeTamaina, int multzoTamaina, boolean ordPolitika, boolean idazPolitika, boolean wtPolitika) {
         this.hitzTamaina = hitzTamaina;
         this.blokeTamaina = blokeTamaina;
         this.multzoTamaina = multzoTamaina;
         this.ordPolitika = ordPolitika;
+        this.idazPolitika = idazPolitika;
+        this.wtPolitika = wtPolitika;
+
+        this.TCM = 2;
+        this.TMN = 20;
+        this.TBuff = 1;
+        this.TBl = TMN + (blokeTamaina-1)*TBuff;
 
         cache = new int[5][8];
         Arrays.fill(Arrays.stream(cache).flatMapToInt(Arrays::stream).toArray(), 0);
@@ -63,7 +85,7 @@ public class CacheMemoria {
     }
 
     /**
-     * Bloke bat ekarri cache memorian
+     * Bloke bat ekarri cache memorian eta ziklo kopurua itzuli
      * @param helbidea Helbide fisikoa
      * @return Ziklo kopurua
      */
@@ -100,6 +122,7 @@ public class CacheMemoria {
             }
             cache[ORD][aukeratutakoBlokea] = 0;
             azkenikAtzitutakoCMBlokea = aukeratutakoBlokea;
+            zikloak += TCM + TBl;
 
         } else {
             // Hutsik ez dago
@@ -135,7 +158,9 @@ public class CacheMemoria {
     }
 
     /**
-     * Bloke bat kendu cache memoriatik
+     * Bloke bat kendu cache memoriatik eta ziklo kopurua itzuli.
+     * Write-Back politika bada, blokea MNan eguneratu zikloak gehituz
+     *
      * @param multzoa Zein multzotik kendu blokea
      * @return Ziklo kopurua
      */
@@ -143,19 +168,25 @@ public class CacheMemoria {
         int kentzekoBlokea = -1;
         // Bilatu kentzeko blokea (ORD gehiena duena)
         for (int i = multzoa * multzoTamaina; i < multzoa * multzoTamaina + multzoTamaina; i++) {
-            if (cache[OKUP][i] == 1 && cache[ORD][i] >= multzoTamaina-1) {
+            if (cache[OKUP][i] == 1 && cache[ORD][i] >= multzoTamaina - 1) {
                 kentzekoBlokea = i;
             }
         }
         // Kendu blokea eta eguneratu ordena
         for (int i = multzoa * multzoTamaina; i < multzoa * multzoTamaina + multzoTamaina; i++) {
-            if (cache[OKUP][i] < multzoTamaina-1) {
+            if (cache[OKUP][i] < multzoTamaina - 1) {
                 cache[ORD][i]++;
             }
         }
         cache[OKUP][kentzekoBlokea] = 0;
 
-        return 20;
+        if (idazPolitika == WB && cache[ALD][kentzekoBlokea] == 1) {
+            // Write-Back
+            cache[ALD][kentzekoBlokea] = 0;
+            return TCM + TBl;
+        } else
+            return 0;
+
     }
 
     /**
@@ -181,10 +212,22 @@ public class CacheMemoria {
         System.out.println("\n└──────┴─────┴─────┴─────┴┴────────┘ ");
     }
 
+    /**
+     * Cache taula inprimatu cache memoriako azkenik atzitutako blokea koloreztatuz
+     *
+     * @see #printCacheHighlightedWith
+     */
     public void printCache() {
         printCacheHighlightedWith(azkenikAtzitutakoCMBlokea, "\u001B[0;93m");
     }
 
+    /**
+     * Helbide bat irakurri eta cache taula inprimatu
+     * @param helbidea Helbide fisikoa
+     *
+     * @see #irakurri
+     * @see #printCache
+     */
     public void irakurriAndPrint(int helbidea) {
         int zikloak = irakurri(helbidea);
         printCache();
