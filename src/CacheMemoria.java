@@ -77,8 +77,8 @@ public class CacheMemoria {
         // Bilatu bloke hutsik
         int[] blokeHutsik = new int[multzoTamaina];
         ArrayList<Integer> blokeHutsikIndizeak = new ArrayList<>();
-        for (int i = 0; i < multzoTamaina; i++) {
-            if (cache[OKUP][multzoa*multzoTamaina+i] == 0) {
+        for (int i = multzoa*multzoTamaina; i < multzoa*multzoTamaina+multzoTamaina; i++) {
+            if (cache[OKUP][i] == 0) {// hemos cambiado aqui el valor de i
                 // Blokea hutsik
                 blokeHutsikIndizeak.add(i);
             }
@@ -88,7 +88,6 @@ public class CacheMemoria {
             int aukeratutakoBlokea;
             aukeratutakoBlokea = blokeHutsikIndizeak.get((int)(Math.random()*blokeHutsikIndizeak.size()));
             // Ekarri blokea
-            aukeratutakoBlokea = multzoa*multzoTamaina+aukeratutakoBlokea;
             cache[OKUP][aukeratutakoBlokea] = 1;
             cache[ALD][aukeratutakoBlokea] = 0;
             cache[TAG][aukeratutakoBlokea] = tag;
@@ -119,7 +118,7 @@ public class CacheMemoria {
 
         int blokeaMN = helbidea / hitzTamaina / blokeTamaina;
         int multzoa = blokeaMN % (8/multzoTamaina);
-        int tag = blokeaMN / multzoTamaina;
+        int tag = blokeaMN / (8/multzoTamaina);
 
         for (int i = multzoa*multzoTamaina; i < multzoa*multzoTamaina+multzoTamaina; i++) {
             if (cache[OKUP][i] == 1) {
