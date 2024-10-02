@@ -21,6 +21,7 @@ public class CacheMenu {
             option = askForOperation();
         }
         c.printStats();
+        c.kenduGeratzenDirenBlokeak();
     }
 
     private void printTitle() {
@@ -33,16 +34,18 @@ public class CacheMenu {
     }
 
     private int askForOperation() {
-        System.out.print("Irakurri (0) / Idatzi (1) > ");
+        System.out.print("Irakurri (0) / Idatzi (1) [Irten (-1)] > ");
         int option = ReadIntFromPool(new int[]{-1, 0, 1});
 
         if (option == 0) {
             System.out.print("Memoria helbidea > ");
             int helbidea = ReadAdress();
+            System.out.println();
             c.irakurriAndPrint(helbidea);
         } else if (option == 1) {
             System.out.print("Memoria helbidea > ");
             int helbidea = ReadAdress();
+            System.out.println();
             c.idatziAndPrint(helbidea);
         }
         return option;

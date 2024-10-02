@@ -7,6 +7,8 @@ public class CacheEstadistika {
     private int miss;
     private int readCount;
     private int writeCount;
+    private int WBCount;
+    private int WBzikloak;
 
     public CacheEstadistika() {
         zikloak = 0;
@@ -14,14 +16,6 @@ public class CacheEstadistika {
         miss = 0;
         readCount = 0;
         writeCount = 0;
-    }
-
-    public CacheEstadistika(CacheEstadistika e) {
-        zikloak = e.getZikloak();
-        hit = e.hit;
-        miss = e.miss;
-        readCount = e.readCount;
-        writeCount = e.writeCount;
     }
 
     public void addZikloak(int z) {
@@ -76,8 +70,20 @@ public class CacheEstadistika {
     }
 
     public void getStatistikenLaburpena() {
-        System.out.printf(  "Eragiketak:   %d (%d RD + %d WR)\n", getEragiketaKopurua(), getReadCount(), getWriteCount());
-        System.out.println( "Asmatzeak:    "+getHit());
-        System.out.printf( "Asmatze tasa: h = %.2f", getHitRate());
+        System.out.printf(  "   Eragiketak:   %d (%d RD + %d WR)\n", getEragiketaKopurua(), getReadCount(), getWriteCount());
+        System.out.println( "   Asmatzeak:    "+getHit());
+        System.out.printf(  "   Asmatze tasa: h = %.2f\n", getHitRate());
+    }
+
+    public void addWBCount() {
+        WBCount++;
+    }
+
+    public void addWBZikloak(int z) {
+        WBzikloak += z;
+    }
+
+    public int getWBZikloak() {
+        return WBzikloak;
     }
 }

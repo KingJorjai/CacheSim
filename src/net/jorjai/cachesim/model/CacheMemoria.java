@@ -83,7 +83,7 @@ public class CacheMemoria {
         int blokeaCM = helbidea % blokeTamaina;
 
         printEragiketaInfo(helbidea);
-        System.out.print("    Rd/Wr: Read -- ");
+        System.out.print("   Rd/Wr: Read -- ");
 
         int zikloak = 0;
         // Cachean bilatu
@@ -108,7 +108,7 @@ public class CacheMemoria {
         }
         estadistika.addZikloak(zikloak);
         estadistika.addReadCount();
-        System.out.printf("    T_erag: %d ziklo, (Tcm: %d, Tmn: %d, bl: %d)\n", zikloak, TCM, TMN, TBl);
+        System.out.printf("   T_erag: %d ziklo, (Tcm: %d, Tmn: %d, bl: %d)\n", zikloak, TCM, TMN, TBl);
         return zikloak;
     }
 
@@ -119,7 +119,7 @@ public class CacheMemoria {
      */
     public int idatzi(int helbidea) {
         printEragiketaInfo(helbidea);
-        System.out.print("    Rd/Wr: Write -- ");
+        System.out.print("   Rd/Wr: Write -- ");
 
         int zikloak = 0;
 
@@ -157,7 +157,7 @@ public class CacheMemoria {
 
         estadistika.addZikloak(zikloak);
         estadistika.addWriteCount();
-        System.out.printf("    T_erag: %d ziklo, (Tcm: %d, Tmn: %d, bl: %d)\n", zikloak, TCM, TMN, TBl);
+        System.out.printf("   T_erag: %d ziklo, (Tcm: %d, Tmn: %d, bl: %d)\n", zikloak, TCM, TMN, TBl);
         return zikloak;
     }
 
@@ -165,9 +165,9 @@ public class CacheMemoria {
         int blokeaMN = helbidea / hitzTamaina / blokeTamaina;
         int multzoa = blokeaMN % (8/multzoTamaina);
 
-        System.out.printf(" >> %d. eragiketa\n", estadistika.getEragiketaKopurua()+1);
-        System.out.printf("    Helbidea: %d - Hitza: %d - Blokea: %d (%d-%d hitzak)\n", helbidea, helbidea /hitzTamaina, blokeaMN, blokeaMN *blokeTamaina, blokeaMN *blokeTamaina+blokeTamaina-1);
-        System.out.printf("    Multzoa: %d - Tag: %d\n", multzoa, blokeaMN /(8/multzoTamaina));
+        System.out.printf(">> %d. eragiketa\n", estadistika.getEragiketaKopurua()+1);
+        System.out.printf("   Helbidea: %d - Hitza: %d - Blokea: %d (%d-%d hitzak)\n", helbidea, helbidea /hitzTamaina, blokeaMN, blokeaMN *blokeTamaina, blokeaMN *blokeTamaina+blokeTamaina-1);
+        System.out.printf("   Multzoa: %d - Tag: %d\n", multzoa, blokeaMN /(8/multzoTamaina));
     }
 
     /**
@@ -186,7 +186,7 @@ public class CacheMemoria {
         int[] blokeHutsik = new int[multzoTamaina];
         ArrayList<Integer> blokeHutsikIndizeak = new ArrayList<>();
         for (int i = multzoa*multzoTamaina; i < multzoa*multzoTamaina+multzoTamaina; i++) {
-            if (cache[OKUP][i] == 0) {// hemos cambiado aqui el valor de i
+            if (cache[OKUP][i] == 0) {
                 // Blokea hutsik
                 blokeHutsikIndizeak.add(i);
             }
@@ -281,6 +281,8 @@ public class CacheMemoria {
         if (idazPolitika == WB && cache[ALD][kentzekoBlokea] == 1) {
             // Write-Back
             cache[ALD][kentzekoBlokea] = 0;
+            estadistika.addWBCount();
+            estadistika.addWBZikloak(TCM + TBl);
             return TCM + TBl;
         } else
             return 0;
@@ -294,22 +296,22 @@ public class CacheMemoria {
         String reset = "\033[0m";
 
         System.out.print(reset);
-        System.out.println("    ┌──────┬─────┬─────┬─────┬┬────────┐ ");
-        System.out.print(  "    │ okup │ ald │ tag │ ord ││ blokea │");
+        System.out.println("   ┌──────┬─────┬─────┬─────┬┬────────┐ ");
+        System.out.print(  "   │ okup │ ald │ tag │ ord ││ blokea │");
         for (int i = 0; i < 8; i++) {
             System.out.println();
             if (i % multzoTamaina == 0) {
-                System.out.println("    ├──────┼─────┼─────┼─────┼┼────────┤ ");
+                System.out.println("   ├──────┼─────┼─────┼─────┼┼────────┤ ");
             }
             if (i == azkenikAtzitutakoCMBlokea) {
-                System.out.printf("    │ "+color+"%4d"+reset+" │ "+color+"%3s"+reset+" │ "+color+"%3d"+reset+" │ "+color+"%3s"+reset+" ││ "+color+"%6s"+reset+" │",
+                System.out.printf("   │ "+color+"%4d"+reset+" │ "+color+"%3s"+reset+" │ "+color+"%3d"+reset+" │ "+color+"%3s"+reset+" ││ "+color+"%6s"+reset+" │"+color+" <<"+reset,
                         cache[OKUP][i], idazPolitika?"-":cache[ALD][i], cache[TAG][i], (multzoTamaina==1)?"-":cache[ORD][i], (cache[OKUP][i]==1)?cache[BLOKEA][i]:"---");
             } else {
-                System.out.printf("    │ %4d │ %3s │ %3d │ %3s ││ %6s │",
+                System.out.printf("   │ %4d │ %3s │ %3d │ %3s ││ %6s │",
                         cache[OKUP][i], idazPolitika?"-":cache[ALD][i], cache[TAG][i], (multzoTamaina==1)?"-":cache[ORD][i], (cache[OKUP][i]==1)?cache[BLOKEA][i]:"---");
             }
         }
-        System.out.println("\n    └──────┴─────┴─────┴─────┴┴────────┘ \n");
+        System.out.println("\n   └──────┴─────┴─────┴─────┴┴────────┘ \n");
 
     }
 
@@ -347,13 +349,36 @@ public class CacheMemoria {
         // Titulua
         System.out.println("\n\n===== Simulazioaren emaitza globalak =====\n");
         // Cachearen karakteristikak
-        System.out.printf("%d byteko hitzak - %d byteko blokeak (%d hitz)\n", hitzTamaina, blokeTamaina*hitzTamaina, blokeTamaina);
-        System.out.printf("Cachea: %d multzo x %d bloke -- %s\n\n", 8/multzoTamaina, multzoTamaina, (ordPolitika==LRU)?"LRU":"FIFO");
+        System.out.printf("   %d byteko hitzak - %d byteko blokeak (%d hitz)\n", hitzTamaina, blokeTamaina*hitzTamaina, blokeTamaina);
+        System.out.printf("   Cachea: %d multzo x %d bloke -- %s\n\n", 8/multzoTamaina, multzoTamaina, (ordPolitika==LRU)?"LRU":"FIFO");
 
         // Estadistikak
         estadistika.getStatistikenLaburpena();
     }
 
-
+    /**
+     * Write-Back politikarekin cachean geratzen diren blokeak kendu eta ziklo kopurua itzuli
+     * Programaren amaieran deitu behar da
+     *
+     * @return Blokeak kentzeko behar den ziklo kopurua
+     */
+    public int kenduGeratzenDirenBlokeak() {
+        int zikloak = 0;
+        int kendutakoBlokeKop = 0;
+        if (idazPolitika == WB) {
+            for (int i = 0; i < 8; i++) {
+                if (cache[OKUP][i] == 1 && cache[ALD][i] == 1) {
+                    zikloak += TCM + TBl;
+                    kendutakoBlokeKop++;
+                }
+            }
+            estadistika.addZikloak(zikloak);
+            System.out.printf( "   T osoa WB = %d ziklo (%.2f ziklo/erag)\n", estadistika.getWBZikloak(), (estadistika.getEragiketaKopurua()==0)?0:(double)estadistika.getWBZikloak()/(double)estadistika.getEragiketaKopurua());
+            System.out.println();
+            System.out.printf("   >> WB: bukatzean, %d bloke MNra: %d ziklo", kendutakoBlokeKop, zikloak);
+            System.out.println();
+        }
+        return zikloak;
+    }
 
 }

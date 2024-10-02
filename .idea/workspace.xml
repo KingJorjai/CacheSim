@@ -5,12 +5,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="cfb48396-e96e-4561-b17d-6281ca3b8acb" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/uiDesigner.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/net/jorjai/cachesim/menu/CacheMenu.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/net/jorjai/cachesim/model/CacheEstadistika.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/CacheMemoria.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/net/jorjai/cachesim/model/CacheMemoria.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Main.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/net/jorjai/cachesim/menu/CacheMenu.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/net/jorjai/cachesim/menu/CacheMenu.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/net/jorjai/cachesim/model/CacheEstadistika.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/net/jorjai/cachesim/model/CacheEstadistika.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/net/jorjai/cachesim/model/CacheMemoria.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/net/jorjai/cachesim/model/CacheMemoria.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -90,7 +88,7 @@
       <workItem from="1727424767555" duration="1613000" />
       <workItem from="1727426550395" duration="535000" />
       <workItem from="1727427112528" duration="4749000" />
-      <workItem from="1727432978389" duration="27264000" />
+      <workItem from="1727432978389" duration="31561000" />
     </task>
     <servers />
   </component>
