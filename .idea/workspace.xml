@@ -56,7 +56,7 @@
 }]]></component>
   <component name="RunManager">
     <configuration name="Main" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
-      <option name="MAIN_CLASS_NAME" value="Main" />
+      <option name="MAIN_CLASS_NAME" value="net.jorjai.cachesim.Main" />
       <module name="CacheSim" />
       <method v="2">
         <option name="Make" enabled="true" />

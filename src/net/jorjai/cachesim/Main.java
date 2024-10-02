@@ -1,3 +1,5 @@
+package net.jorjai.cachesim;
+
 import net.jorjai.cachesim.menu.CacheMenu;
 
 public class Main {
