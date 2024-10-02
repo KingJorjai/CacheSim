@@ -1,3 +1,5 @@
+package net.jorjai.cachesim.model;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -6,46 +8,65 @@ import java.util.Arrays;
  */
 public class CacheMemoria {
 
-    /** Cachearen propietateak */
+    /** Hitz tamaina, bytetan */
     private final int hitzTamaina;
+    /** Bloke tamaina, hitzetan*/
     private final int blokeTamaina;
+    /** Multzo tamaina, bloketan */
     private final int multzoTamaina;
 
     /** Latentzia denborak */
     private final int TCM;
     private final int TMN;
     private final int TBuff;
-    private final int TBt;
+    private final int TBl;
 
-    /** 0(FIFO) - 1(LRU) */
+    /** true(FIFO) - false(LRU) */
     private final boolean ordPolitika;
     public final static boolean FIFO=true, LRU=false;
 
-    /** 0(Write-Back) - 1(Write-Through) */
+    /** false(write-back) - true(write-through) */
     private final boolean idazPolitika;
     public final static boolean WB=false, WT=true;
 
-    /** 0(Write-Allocate) - 1(No-Write-Allocate) */
+    /** false(write-allocate) - true(write-no-allocate) */
     private final boolean wtPolitika;
-    public final static boolean WA=false, NWA=true;
+    public final static boolean WA=false, WNA =true;
 
     private final int OKUP=0, ALD=1, TAG=2, ORD=3, BLOKEA=4;
     private int [][] cache;
 
     private int azkenikAtzitutakoCMBlokea = -1;
+    private CacheEstadistika estadistika;
 
+    /**
+     * CacheMemoria klasearen konstruktorea
+     * @param hitzTamaina Hitz tamaina, bytetan
+     * @param blokeTamaina Bloke tamaina, hitzetan
+     * @param multzoTamaina Multzo tamaina, bloketan
+     * @param ordPolitika FIFO(true) edo LRU(false)
+     * @param idazPolitika write-back(false) edo write-through(true)
+     * @param wtPolitika write-allocate(false) edo write-no-allocate(true).
+     *                   Only used if idazPolitika is write-through.
+     */
     public CacheMemoria(int hitzTamaina, int blokeTamaina, int multzoTamaina, boolean ordPolitika, boolean idazPolitika, boolean wtPolitika) {
         this.hitzTamaina = hitzTamaina;
         this.blokeTamaina = blokeTamaina;
         this.multzoTamaina = multzoTamaina;
         this.ordPolitika = ordPolitika;
         this.idazPolitika = idazPolitika;
-        this.wtPolitika = wtPolitika;
+        if (idazPolitika == WT) {
+            this.wtPolitika = wtPolitika;
+        } else {
+            this.wtPolitika = WA;
+        }
 
         this.TCM = 2;
         this.TMN = 20;
         this.TBuff = 1;
-        this.TBt = TMN + (blokeTamaina-1)*TBuff;
+        this.TBl = TMN + (blokeTamaina-1)*TBuff;
+
+        this.estadistika = new CacheEstadistika();
 
         cache = new int[5][8];
         Arrays.fill(Arrays.stream(cache).flatMapToInt(Arrays::stream).toArray(), 0);
@@ -61,10 +82,14 @@ public class CacheMemoria {
         int multzoa = blokeaMN % (8/multzoTamaina);
         int blokeaCM = helbidea % blokeTamaina;
 
+        printEragiketaInfo(helbidea);
+        System.out.print("    Rd/Wr: Read -- ");
+
         int zikloak = 0;
         // Cachean bilatu
         if (cacheanDago(helbidea)) {
             // Hit
+            System.out.println("ASMATZEA");
             zikloak += 2;
             if (ordPolitika==LRU) {
                 for (int i=multzoa*multzoTamaina; i<multzoa*multzoTamaina+multzoTamaina-1; i++) {
@@ -78,9 +103,12 @@ public class CacheMemoria {
         }
         else {
             // Miss
+            System.out.println("HUTSEGITEA");
             zikloak += ekarriBlokea(helbidea);
         }
-
+        estadistika.addZikloak(zikloak);
+        estadistika.addReadCount();
+        System.out.printf("    T_erag: %d ziklo, (Tcm: %d, Tmn: %d, bl: %d)\n", zikloak, TCM, TMN, TBl);
         return zikloak;
     }
 
@@ -90,9 +118,8 @@ public class CacheMemoria {
      * @return Ziklo kopurua
      */
     public int idatzi(int helbidea) {
-        int blokeaMN = helbidea / hitzTamaina / blokeTamaina;
-        int multzoa = blokeaMN % (8/multzoTamaina);
-        int blokeaCM = helbidea % blokeTamaina;
+        printEragiketaInfo(helbidea);
+        System.out.print("    Rd/Wr: Write -- ");
 
         int zikloak = 0;
 
@@ -101,17 +128,20 @@ public class CacheMemoria {
                 // Hit
                 zikloak += TCM;
                 cache[ALD][azkenikAtzitutakoCMBlokea] = 1;
+                System.out.println("ASMATZEA");
             }
             else {
                 // Miss
                 zikloak += ekarriBlokea(helbidea);
                 cache[ALD][azkenikAtzitutakoCMBlokea] = 1;
+                System.out.println("HUTSEGITEA");
             }
         } else {
             // Write-Through
             if (cacheanDago(helbidea)) {
                 // Hit
                 zikloak += TCM + TMN;
+                System.out.println("ASMATZEA");
             }
             else {
                 // Miss
@@ -121,10 +151,23 @@ public class CacheMemoria {
                 else {
                     zikloak += TCM + TMN;
                 }
+                System.out.println("HUTSEGITEA");
             }
         }
 
+        estadistika.addZikloak(zikloak);
+        estadistika.addWriteCount();
+        System.out.printf("    T_erag: %d ziklo, (Tcm: %d, Tmn: %d, bl: %d)\n", zikloak, TCM, TMN, TBl);
         return zikloak;
+    }
+
+    private void printEragiketaInfo(int helbidea) {
+        int blokeaMN = helbidea / hitzTamaina / blokeTamaina;
+        int multzoa = blokeaMN % (8/multzoTamaina);
+
+        System.out.printf(" >> %d. eragiketa\n", estadistika.getEragiketaKopurua()+1);
+        System.out.printf("    Helbidea: %d - Hitza: %d - Blokea: %d (%d-%d hitzak)\n", helbidea, helbidea /hitzTamaina, blokeaMN, blokeaMN *blokeTamaina, blokeaMN *blokeTamaina+blokeTamaina-1);
+        System.out.printf("    Multzoa: %d - Tag: %d\n", multzoa, blokeaMN /(8/multzoTamaina));
     }
 
     /**
@@ -165,7 +208,7 @@ public class CacheMemoria {
             }
             cache[ORD][aukeratutakoBlokea] = 0;
             azkenikAtzitutakoCMBlokea = aukeratutakoBlokea;
-            zikloak += TCM + TBt;
+            zikloak += TCM + TBl;
 
         } else {
             // Hutsik ez dago
@@ -201,12 +244,14 @@ public class CacheMemoria {
                         }
                         cache[ORD][i] = 0;
                     }
+                    estadistika.addHit();
                     return true;
                 }
             }
         }
 
         // Miss
+        estadistika.addMiss();
         return false;
     }
 
@@ -236,7 +281,7 @@ public class CacheMemoria {
         if (idazPolitika == WB && cache[ALD][kentzekoBlokea] == 1) {
             // Write-Back
             cache[ALD][kentzekoBlokea] = 0;
-            return TCM + TBt;
+            return TCM + TBl;
         } else
             return 0;
 
@@ -249,20 +294,23 @@ public class CacheMemoria {
         String reset = "\033[0m";
 
         System.out.print(reset);
-        System.out.println("┌──────┬─────┬─────┬─────┬┬────────┐ ");
-        System.out.print(  "│ okup │ ald │ tag │ ord ││ blokea │");
+        System.out.println("    ┌──────┬─────┬─────┬─────┬┬────────┐ ");
+        System.out.print(  "    │ okup │ ald │ tag │ ord ││ blokea │");
         for (int i = 0; i < 8; i++) {
             System.out.println();
             if (i % multzoTamaina == 0) {
-                System.out.println("├──────┼─────┼─────┼─────┼┼────────┤ ");
+                System.out.println("    ├──────┼─────┼─────┼─────┼┼────────┤ ");
             }
             if (i == azkenikAtzitutakoCMBlokea) {
-                System.out.printf("│ "+color+"%4d"+reset+" │ "+color+"%3d"+reset+" │ "+color+"%3d"+reset+" │ "+color+"%3d"+reset+" ││ "+color+"%6s"+reset+" │", cache[OKUP][i], cache[ALD][i], cache[TAG][i], cache[ORD][i], (cache[OKUP][i]==1)?String.valueOf(cache[BLOKEA][i]):"---");
+                System.out.printf("    │ "+color+"%4d"+reset+" │ "+color+"%3s"+reset+" │ "+color+"%3d"+reset+" │ "+color+"%3s"+reset+" ││ "+color+"%6s"+reset+" │",
+                        cache[OKUP][i], idazPolitika?"-":cache[ALD][i], cache[TAG][i], (multzoTamaina==1)?"-":cache[ORD][i], (cache[OKUP][i]==1)?cache[BLOKEA][i]:"---");
             } else {
-                System.out.printf("│ %4d │ %3d │ %3d │ %3d ││ %6s │", cache[OKUP][i], cache[ALD][i], cache[TAG][i], cache[ORD][i], (cache[OKUP][i]==1)?String.valueOf(cache[BLOKEA][i]):"---");
+                System.out.printf("    │ %4d │ %3s │ %3d │ %3s ││ %6s │",
+                        cache[OKUP][i], idazPolitika?"-":cache[ALD][i], cache[TAG][i], (multzoTamaina==1)?"-":cache[ORD][i], (cache[OKUP][i]==1)?cache[BLOKEA][i]:"---");
             }
         }
-        System.out.println("\n└──────┴─────┴─────┴─────┴┴────────┘ ");
+        System.out.println("\n    └──────┴─────┴─────┴─────┴┴────────┘ \n");
+
     }
 
     /**
@@ -284,13 +332,28 @@ public class CacheMemoria {
     public void irakurriAndPrint(int helbidea) {
         int zikloak = irakurri(helbidea);
         printCache();
-        System.out.println("Helbide: "+helbidea+" Zikloak: "+zikloak);
     }
 
+    /**
+     * Helbide bat idatzi eta cache taula inprimatu
+     * @param helbidea Helbide fisikoa
+     */
     public void idatziAndPrint(int helbidea) {
         int zikloak = idatzi(helbidea);
         printCache();
-        System.out.println("Helbide: "+helbidea+" Zikloak: "+zikloak);
     }
+
+    public void printStats() {
+        // Titulua
+        System.out.println("\n\n===== Simulazioaren emaitza globalak =====\n");
+        // Cachearen karakteristikak
+        System.out.printf("%d byteko hitzak - %d byteko blokeak (%d hitz)\n", hitzTamaina, blokeTamaina*hitzTamaina, blokeTamaina);
+        System.out.printf("Cachea: %d multzo x %d bloke -- %s\n\n", 8/multzoTamaina, multzoTamaina, (ordPolitika==LRU)?"LRU":"FIFO");
+
+        // Estadistikak
+        estadistika.getStatistikenLaburpena();
+    }
+
+
 
 }
